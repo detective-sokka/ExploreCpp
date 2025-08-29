@@ -59,10 +59,10 @@ public:
         if (&obj == this)
             return *this;
 
-        T* new_data;         
+        T* new_data = nullptr;          
 
         try {
-            new_data = new T[obj.m_capacity];
+            new_data = new T[obj.m_capacity]; // Allocate
             
             for (int i=0; i < obj.m_size; i++)
                 new_data[i] = obj.m_data[i];                      
@@ -73,7 +73,7 @@ public:
         }
 
         delete[] m_data;
-        m_data = new_data;
+        m_data = new_data; // Commit
         m_size = obj.m_size;
         m_capacity = obj.m_capacity;          
         return *this;
