@@ -106,9 +106,6 @@ public:
         m_size = 0;
     }
 
-    void shrink_to_fit() {        
-    }
-
     void debug_vector() const noexcept {
         std::cout << "\nContents of vector are : ";
         if (!m_data) 
@@ -121,7 +118,7 @@ public:
         return m_data[index];
     }
 
-    T& operator[] (const size_t &index) const noexcept {
+    T& operator[] (const size_t &index) const noexcept { // Does this cause a bug? 
         return m_data[index];
     } 
 
