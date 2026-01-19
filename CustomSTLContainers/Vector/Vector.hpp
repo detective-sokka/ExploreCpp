@@ -24,27 +24,8 @@ public:
             m_data[m_size++] = v;
     }
  
-    Vector(const Vector<T>& obj) : m_data{nullptr}, 
-                                   m_size{0},
-                                   m_capacity{0} {
-        
-        T* new_data = nullptr;
-        
-        try {
-            
-            new_data = new T[obj.capacity()];
-            for (size_t i=0; i < obj.m_size; i++)
-                new_data[i] = obj.m_data[i];
-
-        } catch(...){
-            
-            delete[] new_data;
-            throw;
-        }
-
-        m_data = new_data;
-        m_size = obj.m_size;
-        m_capacity = obj.m_capacity;
+    Vector(const Vector<T>& obj) {
+        *this = obj;
     }
 
     Vector(Vector&& obj) noexcept : m_data{obj.m_data}, 
@@ -118,11 +99,11 @@ public:
             std::cout << m_data[i] << ", ";
     }
 
-    T& operator[] (size_t &index) noexcept {
+    T& operator[] (size_t index) noexcept {
         return m_data[index];
     }
 
-    T& operator[] (const size_t &index) const noexcept { // Does this cause a bug? 
+    const T& operator[] (size_t index) const noexcept {
         return m_data[index];
     } 
 
@@ -150,18 +131,14 @@ public:
         m_data = new_data;
     }
 
-    void push_back(const T &value) {
+    void push_back(const T& value) {
         if (m_size == m_capacity)
             grow();
-        
         m_data[m_size++] = value;
     }
 
     void push_back(T&& value) {
-        if (m_size == m_capacity)
-            grow();
-
-        m_data[m_size++] = std::move(value);
+        emplace_back(std::move(value));
     }
 
     void pop_back() noexcept {
@@ -171,11 +148,10 @@ public:
         }
     }   
 
-    template <typename ... Args> 
+    template <typename... Args> 
     T& emplace_back(Args&& ... args) {
         if (m_size == m_capacity)
             grow();
-
         ::new (m_data + m_size) T(std::forward<Args>(args)...);
         return m_data[m_size++];
     }
