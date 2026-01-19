@@ -1,3 +1,5 @@
+// C++20
+
 #include <initializer_list>
 #include <iostream>
 #include <string>
@@ -103,6 +105,8 @@ public:
     }
 
     void clear() noexcept {
+        for (size_t i = 0; i < m_size; i++)
+            m_data[i].~T();
         m_size = 0;
     }
 
@@ -129,10 +133,15 @@ public:
         try {
             
             new_data = new T[m_capacity];
-            for (size_t i = 0; i < m_size; i++)
-                new_data[i] = std::move_if_noexcept(m_data[i]);        
+            for (size_t i = 0; i < m_size; i++) {
+                ::new (new_data + i) T(std::move_if_noexcept(m_data[i]));
+                m_data[i].~T();
+            }
 
         } catch (...) { 
+            // Destruct any successfully constructed elements
+            for (size_t i = 0; i < m_size; i++)
+                new_data[i].~T();
             delete[] new_data;
             throw;
         }
@@ -156,19 +165,25 @@ public:
     }
 
     void pop_back() noexcept {
-        if (m_size)
+        if (m_size) {
+            m_data[m_size - 1].~T();
             m_size--;   
+        }
     }   
 
     template <typename ... Args> 
-    void emplace_back(Args&& ... args) {
+    T& emplace_back(Args&& ... args) {
         if (m_size == m_capacity)
             grow();
-        m_data[m_size++] = T(std::forward<Args>(args)...);
+
+        ::new (m_data + m_size) T(std::forward<Args>(args)...);
+        return m_data[m_size++];
     }
 
 
     ~Vector() {
+        for (size_t i = 0; i < m_size; i++)
+            m_data[i].~T();
         delete[] m_data;
     }    
 
@@ -205,6 +220,11 @@ void test_custom_vector() {
     strVec3[1] = "z";
     strVec2.debug_vector();
     strVec3.debug_vector();
+
+    std::cout << "\n===== Testing emplace_back =====\n";
+    strVec.emplace_back("e");
+    strVec.emplace_back("f");
+    strVec.debug_vector();
 }
 
 int main() {
