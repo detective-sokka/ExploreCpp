@@ -3,10 +3,18 @@
 template<typename T>
 class SharedPtr {
 
-public:
+private:
     T* m_ptr;
     int* m_ctr;
 
+    void _release() {
+        if (m_ctr && --(*m_ctr) == 0) {
+            delete m_ptr;
+            delete m_ctr;
+        }
+    }
+
+public:
     SharedPtr() : m_ptr{nullptr},
                   m_ctr{nullptr} {
     }
@@ -16,11 +24,7 @@ public:
     }
 
     SharedPtr(const SharedPtr<T>& obj) { // Copy constructor
-        m_ptr = obj.m_ptr;
-        m_ctr = obj.m_ctr;
-
-        if (m_ptr)
-            (*m_ctr)++;
+        *this = obj;
     }
 
     SharedPtr(SharedPtr<T>&& obj) : m_ptr{obj.m_ptr},
@@ -33,6 +37,8 @@ public:
         if (&obj == this)
             return *this;
 
+        _release();
+
         m_ptr = obj.m_ptr;
         m_ctr = obj.m_ctr;
 
@@ -42,9 +48,11 @@ public:
         return *this;
     }
 
-    SharedPtr& operator=(SharedPtr<T> && obj) { // Move assignment operator
+    SharedPtr& operator=(SharedPtr<T> && obj) noexcept { // Move assignment operator
         if (&obj == this)
             return *this;
+
+        _release();
 
         m_ptr = obj.m_ptr;
         m_ctr = obj.m_ctr;
@@ -63,19 +71,15 @@ public:
         return m_ptr;
     }
 
-    int getCount() {
+    int getCount() const noexcept {
         if (!m_ctr)
             return -1;
 
         return *m_ctr;
     }
 
-    ~SharedPtr() {       
-        
-        if (m_ctr && --(*m_ctr) == 0) {            
-            delete m_ptr;
-            delete m_ctr;
-        }
+    ~SharedPtr() noexcept {
+        _release();
     }
 };
 
