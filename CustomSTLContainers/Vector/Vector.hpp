@@ -104,28 +104,28 @@ public:
 
     const T& operator[] (size_t index) const noexcept {
         return m_data[index];
-    } 
+    }
 
     void reserve(size_t new_capacity) {
         if (new_capacity > m_capacity) {
             m_capacity = new_capacity;
             T* new_data = nullptr;
-
-        try {
-            new_data = new T[m_capacity];
-            for (size_t i = 0; i < m_size; i++) {
-                ::new (new_data + i) T(std::move_if_noexcept(m_data[i]));
-                m_data[i].~T();
+            
+            try {
+                new_data = new T[m_capacity];
+                for (size_t i = 0; i < m_size; i++) {
+                    ::new (new_data + i) T(std::move_if_noexcept(m_data[i]));
+                    m_data[i].~T();
+                }
+            } catch (...) {
+                for (size_t i = 0; i < m_size; i++)
+                    new_data[i].~T();
+                delete[] new_data;
+                throw;
             }
-        } catch (...) { 
-            for (size_t i = 0; i < m_size; i++)
-                new_data[i].~T();
-            delete[] new_data;
-            throw;
-        }
-
-        delete[] m_data;
-        m_data = new_data;
+            
+            delete[] m_data;
+            m_data = new_data;
         }
     } 
 
