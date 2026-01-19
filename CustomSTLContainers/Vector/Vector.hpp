@@ -17,11 +17,10 @@ public:
                m_capacity{start_capacity} {
     }
 
-    Vector(std::initializer_list<T> list) : m_data{new T[list.size()]},
-                                            m_size{0},
-                                            m_capacity{list.size()} {
-        for (const auto &v : list)
-            m_data[m_size++] = v;
+    Vector(std::initializer_list<T> list) : Vector() {
+        reserve(list.size());
+        for (const auto& v : list)
+            emplace_back(v);
     }
  
     Vector(const Vector<T>& obj) {
@@ -107,20 +106,18 @@ public:
         return m_data[index];
     } 
 
-    void grow() {
-        m_capacity = m_capacity ? m_capacity * 2 : start_capacity;
-        T *new_data = nullptr;
+    void reserve(size_t new_capacity) {
+        if (new_capacity > m_capacity) {
+            m_capacity = new_capacity;
+            T* new_data = nullptr;
 
         try {
-            
             new_data = new T[m_capacity];
             for (size_t i = 0; i < m_size; i++) {
                 ::new (new_data + i) T(std::move_if_noexcept(m_data[i]));
                 m_data[i].~T();
             }
-
         } catch (...) { 
-            // Destruct any successfully constructed elements
             for (size_t i = 0; i < m_size; i++)
                 new_data[i].~T();
             delete[] new_data;
@@ -129,6 +126,11 @@ public:
 
         delete[] m_data;
         m_data = new_data;
+        }
+    } 
+
+    void grow() {
+        reserve(m_capacity ? m_capacity * 2 : start_capacity);
     }
 
     void push_back(const T& value) {
