@@ -85,8 +85,7 @@ public:
     }
 
     void clear() noexcept {
-        for (size_t i = 0; i < m_size; i++)
-            m_data[i].~T();
+        _destruct_elements();
         m_size = 0;
     }
 
@@ -160,12 +159,16 @@ public:
 
 
     ~Vector() {
-        for (size_t i = 0; i < m_size; i++)
-            m_data[i].~T();
+        _destruct_elements();
         delete[] m_data;
     }    
 
 private: 
+
+    void _destruct_elements() noexcept {
+        for (size_t i = 0; i < m_size; i++)
+            m_data[i].~T();
+    }
 
     T* m_data;
     size_t m_size;
