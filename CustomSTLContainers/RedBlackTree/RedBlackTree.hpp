@@ -11,6 +11,12 @@ public:
 
     void insert(T value) 
     {
+        if (!m_root) 
+        {
+            m_root = std::make_unique<Node>(value);
+            m_root->isRed = false; // Root is always black
+            return;
+        }
     }
 
     void rotateLeft(std::unique_ptr<Node> node) 
@@ -33,7 +39,7 @@ public:
     bool isUncleRed(std::unique_ptr<Node> node) 
     {
     }
-    
+
 private:    
     std::unique_ptr<Node> m_root;
     template <typename T>
