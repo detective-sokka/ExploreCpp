@@ -28,10 +28,12 @@ private:
         Node *left;
         Node *right;
         Node *parent;
-        
+        size_t height;
+
         Node (T value, Node *left = nullptr, Node *right = nullptr) : value{value},
                                                                       left{left},
-                                                                      right{right}                                                            
+                                                                      right{right},
+                                                                      height{0}
 
         {            
         }
