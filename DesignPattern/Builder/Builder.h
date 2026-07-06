@@ -53,15 +53,40 @@ Since postOnly and buy are contradictory, build is expected to check and throw e
 std::expected or std::optional.
 */
 
-class Order
+#include <optional>
+#include <string>
+
+enum Side
 {
-public:
+    BUY, 
+    SELL
+};
 
-private:
-
+struct Order
+{
+    std::string mSecurity;
+    std::optional<Side> mOrderSide;
+    int mQuantity;
+    bool mPostOnly = false;
+    explicit Order (std::string security) : mSecurity{security}
+    {
+    }
 };
 
 class OrderBuilder
 {
+public: 
+explicit OrderBuilder(const std::string& security) : mOrder(security)
+{
+}
 
+OrderBuilder& buy();
+OrderBuilder& sell();
+OrderBuilder& quantity(int quantity);
+OrderBuilder& postOnly(bool postOnly);
+
+std::optional<Order> build();
+
+private:
+    Order mOrder;
 };
