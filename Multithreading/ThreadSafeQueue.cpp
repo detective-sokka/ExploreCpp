@@ -14,7 +14,6 @@ class ThreadSafeQueue {
     ThreadSafeQueue& operator=(const ThreadSafeQueue&) = delete;
 
     void push(T data) {
-
         {
             std::unique_lock<std::mutex> lock(mMutex);
             mData.push_back(data);
@@ -75,6 +74,6 @@ int main() {
     write_thread.join();
     read_and_delete_thread.join();
 
-    return 0;    
+    return 0;
 }
 
